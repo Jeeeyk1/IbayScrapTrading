@@ -20,7 +20,11 @@ const HomeScreen = () => {
   return (
     <>
       {!keyword ? (
-        <ProductCarousel />
+        <div>
+          {' '}
+          <ProductCarousel />
+
+          </div>
       ) : (
         <Link to='/' className='btn btn-light mb-4'>
           Go Back

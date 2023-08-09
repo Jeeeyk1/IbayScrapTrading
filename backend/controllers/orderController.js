@@ -83,16 +83,10 @@ const getOrderById = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Update order to paid
-// @route   GET /api/orders/:id/pay
-// @access  Private
 const updateOrderToPaid = asyncHandler(async (req, res) => {
-  // NOTE: here we need to verify the payment was made to PayPal before marking
-  // the order as paid
   const { verified, value } = await verifyPayPalPayment(req.body.id);
   if (!verified) throw new Error('Payment not verified');
 
-  // check if this transaction has been used before
   const isNewTransaction = await checkIfNewTransaction(Order, req.body.id);
   if (!isNewTransaction) throw new Error('Transaction has been used before');
 
@@ -121,9 +115,6 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Update order to delivered
-// @route   GET /api/orders/:id/deliver
-// @access  Private/Admin
 const updateOrderToDelivered = asyncHandler(async (req, res) => {
   const order = await Order.findById(req.params.id);
 
@@ -154,6 +145,21 @@ const markAsPaid = asyncHandler(async (req, res) => {
     throw new Error('Order not found');
   }
 });
+const shippeOutOrder = asyncHandler(async (req, res) => {
+  const order = await Order.findById(req.params.id);
+
+  if (order) {
+    order.isShippedOut = true;
+    order.shippedOutAt = Date.now();
+
+    const updatedOrder = await order.save();
+
+    res.json(updatedOrder);
+  } else {
+    res.status(404);
+    throw new Error('Order not found');
+  }
+});
 
 // @desc    Get all orders
 // @route   GET /api/orders
@@ -162,7 +168,20 @@ const getOrders = asyncHandler(async (req, res) => {
   const orders = await Order.find({}).populate('user', 'id name');
   res.json(orders);
 });
-
+const submitRefNo = asyncHandler(async (req, res) => {
+  const order = await Order.findById(req.params.id);
+  console.log('submitting....');
+  if (order) {
+    console.log('order detected');
+    order.gcashReferenceNumber = req.body.referenceNumber;
+    const updatedOrder = await order.save();
+    console.log('Updating ref no gcash');
+    res.json(updatedOrder);
+  } else {
+    res.status(404);
+    throw new Error('Order not found');
+  }
+});
 export {
   addOrderItems,
   getMyOrders,
@@ -170,5 +189,7 @@ export {
   updateOrderToPaid,
   updateOrderToDelivered,
   getOrders,
-  markAsPaid
+  markAsPaid,
+  shippeOutOrder,
+  submitRefNo,
 };

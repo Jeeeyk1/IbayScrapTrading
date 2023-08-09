@@ -33,6 +33,7 @@ import store from './store';
 import { Provider } from 'react-redux';
 import { PayPalScriptProvider } from '@paypal/react-paypal-js';
 import ReviewProductScreen from './screens/RewiewProduct';
+import GcashPaymentScreen from './screens/GcashPaymentScreen';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -56,6 +57,7 @@ const router = createBrowserRouter(
         <Route path='/payment' element={<PaymentScreen />} />
         <Route path='/placeorder' element={<PlaceOrderScreen />} />
         <Route path='/order/:id' element={<OrderScreen />} />
+        <Route path='/order/gcash/:id' element={<GcashPaymentScreen />} />
         <Route path='/profile' element={<ProfileScreen />} />
       </Route>
       {/* Admin users */}

@@ -6,16 +6,22 @@ import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
+import { useNavigate } from 'react-router-dom';
 import {
   useDeliverOrderMutation,
   useGetOrderDetailsQuery,
   useGetPaypalClientIdQuery,
+  useMarkAsPaidMutation,
   usePayOrderMutation,
 } from '../slices/ordersApiSlice';
 
 const OrderScreen = () => {
   const { id: orderId } = useParams();
+  const navigate = useNavigate();
 
+  function payGcash() {
+    navigate(`/order/gcash/${orderId}`);
+  }
   const {
     data: order,
     refetch,
@@ -27,6 +33,7 @@ const OrderScreen = () => {
 
   const [deliverOrder, { isLoading: loadingDeliver }] =
     useDeliverOrderMutation();
+  const [paidOrder, { isLoading: loadPay }] = useMarkAsPaidMutation();
 
   const { userInfo } = useSelector((state) => state.auth);
 
@@ -39,6 +46,7 @@ const OrderScreen = () => {
   } = useGetPaypalClientIdQuery();
 
   useEffect(() => {
+    console.log(order);
     if (!errorPayPal && !loadingPayPal && paypal.clientId) {
       const loadPaypalScript = async () => {
         paypalDispatch({
@@ -100,6 +108,15 @@ const OrderScreen = () => {
     await deliverOrder(orderId);
     refetch();
   };
+  const markAsPaidHandler = async () => {
+    try {
+      await paidOrder(orderId);
+      refetch();
+      toast.success('Order paid');
+    } catch (err) {
+      toast.error('Error' + err);
+    }
+  };
 
   return isLoading ? (
     <Loader />
@@ -148,6 +165,14 @@ const OrderScreen = () => {
                 <strong>Method: </strong>
                 {order.paymentMethod}
               </p>
+              {order.paymentMethod === 'Gcash' ? (
+                <p>
+                  <strong>Reference Number: </strong>
+                  {order.gcashReferenceNumber}
+                </p>
+              ) : (
+                <p></p>
+              )}
               {order.isPaid ? (
                 <Message variant='success'>Paid on {order.paidAt}</Message>
               ) : (
@@ -207,45 +232,59 @@ const OrderScreen = () => {
                   <Col>₱{order.shippingPrice}.00</Col>
                 </Row>
               </ListGroup.Item>
-              <ListGroup.Item>
-                <Row>
-                  <Col>Tax</Col>
-                  <Col>₱{order.taxPrice}.00</Col>
-                </Row>
-              </ListGroup.Item>
+
               <ListGroup.Item>
                 <Row>
                   <Col>Total</Col>
                   <Col>₱{order.totalPrice}</Col>
                 </Row>
               </ListGroup.Item>
-              {!order.isPaid && !userInfo.isAdmin &&(
-                <ListGroup.Item>
-                  {loadingPay && <Loader />}
+              {!order.isPaid &&
+                !userInfo.isAdmin &&
+                order.paymentMethod === 'PayPal' && (
+                  <ListGroup.Item>
+                    {loadingPay && <Loader />}
 
-                  {isPending ? (
-                    <Loader />
-                  ) : (
-                    <div>
-                      {/* THIS BUTTON IS FOR TESTING! REMOVE BEFORE PRODUCTION! */}
-                      {/* <Button
+                    {isPending ? (
+                      <Loader />
+                    ) : (
+                      <div>
+                        {/* THIS BUTTON IS FOR TESTING! REMOVE BEFORE PRODUCTION! */}
+                        {/* <Button
                         style={{ marginBottom: '10px' }}
                         onClick={onApproveTest}
                       >
                         Test Pay Order
                       </Button> */}
 
-                      <div>
-                        <PayPalButtons
-                          createOrder={createOrder}
-                          onApprove={onApprove}
-                          onError={onError}
-                        ></PayPalButtons>
+                        <div>
+                          <PayPalButtons
+                            createOrder={createOrder}
+                            onApprove={onApprove}
+                            onError={onError}
+                          ></PayPalButtons>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </ListGroup.Item>
-              )}
+                    )}
+                  </ListGroup.Item>
+                )}
+              {!order.isPaid &&
+                !userInfo.isAdmin &&
+                order.paymentMethod === 'Gcash' && (
+                  <ListGroup.Item>
+                    <Button
+                      style={{
+                        marginBottom: '10px',
+                        margin: 'auto',
+                        display: 'block',
+                        backgroundColor: 'blue',
+                      }}
+                      onClick={payGcash}
+                    >
+                      Pay with Gcash
+                    </Button>
+                  </ListGroup.Item>
+                )}
 
               {loadingDeliver && <Loader />}
 
@@ -262,13 +301,13 @@ const OrderScreen = () => {
                   <Button
                     type='button'
                     className='btn btn-block'
-                    onClick={deliverHandler}
+                    onClick={markAsPaidHandler}
                   >
                     Mark As Paid
                   </Button>
                 </ListGroup.Item>
               )}
-              {userInfo && !userInfo.isAdmin &&  (
+              {userInfo && !userInfo.isAdmin && order.isShippedOut && (
                 <ListGroup.Item>
                   <Button
                     type='button'
@@ -278,6 +317,12 @@ const OrderScreen = () => {
                     Order received
                   </Button>
                 </ListGroup.Item>
+              )}
+              {userInfo && !userInfo.isAdmin && order.isDelivered && (
+                <Message>
+                  Click <Link to={`/product/review/${orderId}`}>Here</Link> to
+                  write a review
+                </Message>
               )}
             </ListGroup>
           </Card>

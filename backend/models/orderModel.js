@@ -30,6 +30,9 @@ const orderSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    gcashReferenceNumber: {
+      type: String,
+    },
     paymentResult: {
       id: { type: String },
       status: { type: String },
