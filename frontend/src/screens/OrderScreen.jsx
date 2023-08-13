@@ -13,6 +13,7 @@ import {
   useGetPaypalClientIdQuery,
   useMarkAsPaidMutation,
   usePayOrderMutation,
+  useShipOutMutation,
 } from '../slices/ordersApiSlice';
 
 const OrderScreen = () => {
@@ -33,11 +34,12 @@ const OrderScreen = () => {
 
   const [deliverOrder, { isLoading: loadingDeliver }] =
     useDeliverOrderMutation();
-  const [paidOrder, { isLoading: loadPay }] = useMarkAsPaidMutation();
+  const [shipOutOrder, { isLoading: loadShip }] = useShipOutMutation();
 
   const { userInfo } = useSelector((state) => state.auth);
 
   const [{ isPending }, paypalDispatch] = usePayPalScriptReducer();
+  const [paidOrder, { isLoading: loadPay }] = useMarkAsPaidMutation();
 
   const {
     data: paypal,
@@ -106,7 +108,13 @@ const OrderScreen = () => {
 
   const deliverHandler = async () => {
     await deliverOrder(orderId);
+    toast.success('Order received!');
     refetch();
+  };
+  const shipOutHandler = async () => {
+    await shipOutOrder(orderId);
+    refetch();
+    toast.success('Order Shipped Out!');
   };
   const markAsPaidHandler = async () => {
     try {
@@ -143,16 +151,16 @@ const OrderScreen = () => {
                 {order.shippingAddress.postalCode},{' '}
                 {order.shippingAddress.country}
               </p>
-              {order.isDelivered ? (
+              {order.isShippedOut ? (
                 <Message variant='success'>
-                  Shipped out on {order.deliveredAt}
+                  Shipped out on {order.shippedOutAt}
                 </Message>
               ) : (
                 <Message variant='danger'>Not Shipped out</Message>
               )}
               {order.isDelivered ? (
                 <Message variant='success'>
-                  Shipped out on {order.deliveredAt}
+                  Delivered on {order.deliveredAt}
                 </Message>
               ) : (
                 <Message variant='danger'>Not Delivered</Message>
@@ -288,36 +296,45 @@ const OrderScreen = () => {
 
               {loadingDeliver && <Loader />}
 
-              {userInfo && userInfo.isAdmin && !order.isDelivered && (
-                <ListGroup.Item>
-                  <Button
-                    type='button'
-                    className='btn btn-block'
-                    onClick={deliverHandler}
-                  >
-                    Ship Out
-                  </Button>
-                  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-                  <Button
-                    type='button'
-                    className='btn btn-block'
-                    onClick={markAsPaidHandler}
-                  >
-                    Mark As Paid
-                  </Button>
-                </ListGroup.Item>
-              )}
-              {userInfo && !userInfo.isAdmin && order.isShippedOut && (
-                <ListGroup.Item>
-                  <Button
-                    type='button'
-                    className='btn btn-block'
-                    onClick={deliverHandler}
-                  >
-                    Order received
-                  </Button>
-                </ListGroup.Item>
-              )}
+              {userInfo &&
+                userInfo.isAdmin &&
+                !order.isDelivered &&
+                !order.isShippedOut && (
+                  <ListGroup.Item>
+                    {!order.isPaid ? (
+                      <Button
+                        type='button'
+                        className='btn btn-block'
+                        onClick={markAsPaidHandler}
+                      >
+                        Mark As Paid
+                      </Button>
+                    ) : (
+                      <Button
+                        type='button'
+                        className='btn btn-block'
+                        onClick={shipOutHandler}
+                      >
+                        Ship Out
+                      </Button>
+                    )}
+                  </ListGroup.Item>
+                )}
+
+              {userInfo &&
+                !userInfo.isAdmin &&
+                order.isShippedOut &&
+                !order.isDelivered && (
+                  <ListGroup.Item>
+                    <Button
+                      type='button'
+                      className='btn btn-block'
+                      onClick={deliverHandler}
+                    >
+                      Order received
+                    </Button>
+                  </ListGroup.Item>
+                )}
               {userInfo && !userInfo.isAdmin && order.isDelivered && (
                 <Message>
                   Click <Link to={`/product/review/${orderId}`}>Here</Link> to
