@@ -1,9 +1,15 @@
 import path from 'path';
 import express from 'express';
 import multer from 'multer';
-
+const storageCloud = multer.memoryStorage();
+const uploadImg = multer({ storageCloud });
+import { v2 as cloudinary } from 'cloudinary';
 const router = express.Router();
-
+cloudinary.config({
+  cloud_name: 'dqveua4tx',
+  api_key: '447855287612825',
+  api_secret: 'hmXoYACGI6QJUEWsPCwV_kJPByA',
+});
 const storage = multer.diskStorage({
   destination(req, file, cb) {
     cb(null, 'uploads/');
@@ -44,6 +50,27 @@ router.post('/', (req, res) => {
       image: `/${req.file.path}`,
     });
   });
+});
+router.post('/cloud', uploadImg.single('image'), (req, res) => {
+  const imageData = req.file.buffer.toString('base64');
+  const mimeType = req.file.mimetype;
+  const dataUri = `data:${mimeType};base64,${imageData}`;
+  cloudinary.uploader.upload(
+    dataUri,
+    { folder: 'uploads' },
+    (error, result) => {
+      console.log('uploading....');
+
+      if (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Something went wrong' });
+      } else {
+        console.log('successful');
+        var secureUrl = result.secure_url;
+        res.status(200).json({ url: secureUrl });
+      }
+    }
+  );
 });
 
 export default router;

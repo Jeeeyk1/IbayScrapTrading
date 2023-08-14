@@ -139,18 +139,21 @@ const OrderScreen = () => {
             <ListGroup.Item>
               <h2>Shipping</h2>
               <p>
-                <strong>Name: </strong> {order.user.name}
+                <strong>Name: </strong> {order.shippingAddress.fullName}
               </p>
               <p>
                 <strong>Email: </strong>{' '}
                 <a href={`mailto:${order.user.email}`}>{order.user.email}</a>
               </p>
               <p>
-                <strong>Address:</strong>
+                <strong>Address: </strong>
                 {order.shippingAddress.address}, {order.shippingAddress.city}{' '}
                 {order.shippingAddress.postalCode},{' '}
                 {order.shippingAddress.country}
               </p>
+              <p>
+              <strong>Contact Number: </strong> {order.shippingAddress.contactNumber}
+            </p>
               {order.isShippedOut ? (
                 <Message variant='success'>
                   Shipped out on {order.shippedOutAt}

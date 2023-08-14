@@ -12,6 +12,10 @@ const ShippingScreen = () => {
 
   const [address, setAddress] = useState(shippingAddress.address || '');
   const [city, setCity] = useState(shippingAddress.city || '');
+  const [contactNumber, setContactNumber] = useState(
+    shippingAddress.contactNumber || ''
+  );
+  const [fullName, setFullName] = useState(shippingAddress.fullName || '');
   const [postalCode, setPostalCode] = useState(
     shippingAddress.postalCode || ''
   );
@@ -22,7 +26,28 @@ const ShippingScreen = () => {
 
   const submitHandler = (e) => {
     e.preventDefault();
-    dispatch(saveShippingAddress({ address, city, postalCode, country }));
+    console.log(
+      address +
+        ' address ' +
+        city +
+        ' city' +
+        ' ' +
+        postalCode +
+        ' fullName:' +
+        fullName +
+        ' contact ' +
+        contactNumber
+    );
+    dispatch(
+      saveShippingAddress({
+        address,
+        city,
+        postalCode,
+        country,
+        fullName,
+        contactNumber,
+      })
+    );
     navigate('/payment');
   };
 
@@ -54,13 +79,34 @@ const ShippingScreen = () => {
         </Form.Group>
 
         <Form.Group className='my-2' controlId='postalCode'>
-          <Form.Label>Postal Code</Form.Label>
+          <Form.Label>Zip Code</Form.Label>
           <Form.Control
             type='text'
-            placeholder='Enter postal code'
+            placeholder='Enter zip code'
             value={postalCode}
             required
             onChange={(e) => setPostalCode(e.target.value)}
+          ></Form.Control>
+        </Form.Group>
+
+        <Form.Group className='my-2' controlId='fullName'>
+          <Form.Label>Full Name</Form.Label>
+          <Form.Control
+            type='text'
+            placeholder='Enter Full Name'
+            value={fullName}
+            required
+            onChange={(e) => setFullName(e.target.value)}
+          ></Form.Control>
+        </Form.Group>
+        <Form.Group className='my-2' controlId='contactNumber'>
+          <Form.Label>Contact Number</Form.Label>
+          <Form.Control
+            type='number'
+            placeholder='Enter Contact Number'
+            value={contactNumber}
+            required
+            onChange={(e) => setContactNumber(e.target.value)}
           ></Form.Control>
         </Form.Group>
 
