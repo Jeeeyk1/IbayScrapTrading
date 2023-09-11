@@ -23,7 +23,7 @@ const Product = ({ product }) => {
           />
         </Card.Text>
 
-        <Card.Text as='h3'>₱{product.price}.00</Card.Text>
+        <Card.Text as='h1'>₱{product.price}.00</Card.Text>
       </Card.Body>
     </Card>
   );

@@ -94,9 +94,11 @@ const ProductScreen = () => {
                     text={`${product.numReviews} reviews`}
                   />
                 </ListGroup.Item>
-                <ListGroup.Item>Price: ₱{product.price}</ListGroup.Item>
                 <ListGroup.Item>
-                 <strong> Measure:</strong> {product.description}
+                  Price: <h1 style={{ fontSize: '50px' }}>₱{product.price}</h1>
+                </ListGroup.Item>
+                <ListGroup.Item style={{textAlign:"justify",textJustify:"inter-word"}}>
+                  <strong> Description:</strong> {product.description}
                 </ListGroup.Item>
               </ListGroup>
             </Col>
@@ -107,7 +109,9 @@ const ProductScreen = () => {
                     <Row>
                       <Col>Price:</Col>
                       <Col>
-                        <strong>₱{product.price}</strong>
+                        <strong style={{ fontSize: '30px' }}>
+                          ₱{product.price}
+                        </strong>
                       </Col>
                     </Row>
                   </ListGroup.Item>
@@ -158,13 +162,12 @@ const ProductScreen = () => {
               </Card>
             </Col>
           </Row>
+
           <Row className='review'>
-            <Col md={6}>
-              <h2>Reviews</h2>
-              <Message>
-              Please Purchase this product to write a review
-            </Message>
-              {product.reviews.length === 0 && <Message>No Reviews</Message>}
+            <Col md={10} className='mx-auto' style={{fontColor:"black",height:"500px"}}>
+              <h2 >Reviews</h2>
+              <Message variant="light" >Please Purchase this product to write a review</Message>
+              {product.reviews.length === 0 && <Message variant="light">No Reviews</Message>}
               <ListGroup variant='flush'>
                 {product.reviews.map((review) => (
                   <ListGroup.Item key={review._id}>
@@ -174,7 +177,6 @@ const ProductScreen = () => {
                     <p>{review.comment}</p>
                   </ListGroup.Item>
                 ))}
-              
               </ListGroup>
             </Col>
           </Row>

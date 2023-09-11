@@ -34,9 +34,9 @@ table th {
 
 .review h2 {
   font-size: 24px;
-  background: #f4f4f4;
+  background: yellow;
   padding: 10px;
-  border: 1px solid #ddd;
+  border: 2px solid black;
 }
 
 .review button {
